@@ -1,0 +1,112 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    def globalConfiguration = rootProject.extensions.getByName("ext")
+
+    compileSdkVersion globalConfiguration["androidCompileSdkVersion"]
+
+    defaultConfig {
+        minSdkVersion globalConfiguration["androidMinSdkVersion"]
+        targetSdkVersion globalConfiguration["androidTargetSdkVersion"]
+
+        applicationId globalConfiguration["androidApplicationId"]
+        versionCode globalConfiguration["androidVersionCode"]
+        versionName globalConfiguration["androidVersionName"]
+        testInstrumentationRunner globalConfiguration["testInstrumentationRunner"]
+        testApplicationId globalConfiguration["testApplicationId"]
+
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            it.buildConfigField 'String', 'BASE_URL', baseUrl
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            it.buildConfigField 'String', 'BASE_URL', baseUrl
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        main.java.srcDirs += [file("$buildDir/generated/source/kapt/main")]
+        test.java.srcDirs += 'src/test/kotlin'
+        androidTest.java.srcDirs += 'src/androidTest/kotlin'
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    androidExtensions {
+        experimental = true
+    }
+}
+
+dependencies {
+    def appDependencies = rootProject.ext.app
+    def testDependencies = rootProject.ext.test
+    def devDependencies = rootProject.ext.dev
+
+    implementation project(':data')
+
+    //Compile time dependencies
+    kapt appDependencies.daggerCompiler
+    kapt appDependencies.daggerAndroidProcessor
+    kapt appDependencies.aacCompiler
+    compileOnly appDependencies.javaxAnnotation
+    compileOnly appDependencies.javaxInject
+
+    //Application dependencies
+    implementation appDependencies.appCompat
+    implementation appDependencies.ktx
+    implementation appDependencies.constraintLayout
+    implementation appDependencies.design
+    implementation appDependencies.rxJava
+    implementation appDependencies.rxAndroid
+    implementation appDependencies.rxKotlin
+    implementation appDependencies.dagger
+    implementation appDependencies.daggerSupport
+    implementation appDependencies.androidAnnotations
+    implementation appDependencies.aacExtensions
+    implementation appDependencies.viewModel
+    implementation appDependencies.liveData
+    implementation appDependencies.roomRuntime
+    implementation appDependencies.roomRxJava
+    implementation (appDependencies.retrofit2) {
+        exclude module: 'okhttp'
+    }
+    implementation appDependencies.retrofit2RxAdapter
+    implementation appDependencies.retrofit2GsonConverter
+    implementation appDependencies.okHttp
+    implementation appDependencies.okHttpLogging
+    implementation appDependencies.gson
+    implementation appDependencies.glide
+
+    //Testing dependencies
+    testImplementation testDependencies.junit
+    testImplementation testDependencies.mockito
+    testImplementation testDependencies.aacCoreTest
+    androidTestImplementation testDependencies.testRunner
+    androidTestImplementation testDependencies.testRules
+    androidTestImplementation testDependencies.espressoCore
+    androidTestImplementation testDependencies.espressoContrib
+    androidTestImplementation testDependencies.androidAnnotations
+
+    //Development dependencies
+    debugImplementation devDependencies.leakCanaryDebug
+    releaseImplementation devDependencies.leakCanaryRelease
+}

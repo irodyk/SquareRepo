@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">SquareRepos</string>
+    <string name="title_repository_detail">Repository Detail</string>
+    <string name="bookmarked_item">Bookmarked</string>
+    <string name="starred">Starred</string>
+</resources>
